@@ -17,10 +17,10 @@
     <section style="height: 100vh;">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-10">
-                    <div style="display:<?php if(isset($_SESSION['showAlert'])){echo $_SESSION['showAlert'];}else {echo 'none';} unset($_SESSION['variable']) ?>"
+                <div class="col-lg-12">
+                    <div style="display:<?php if(isset($_SESSION['showAlert'])){echo $_SESSION['showAlert'];}else {echo 'none';} unset($_SESSION['showAlert']); ?>"
                         class="alert alert-success alert-dismissible fade show mt-4" role="alert">
-                        <strong></strong>
+                        <strong><?php if(isset($_SESSION['message'])){echo $_SESSION['message'];} unset($_SESSION['showAlert']); ?></strong>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     <div class="table-responsive mt-4">
@@ -57,9 +57,11 @@
                                     while($row = $result->fetch_assoc()):
                                 ?>
                                 <tr>
+                                    <input type="hidden" class="pid" value="<?= $row['id'] ?>">
                                     <td><img src="<?= $row['product_image'] ?>" height="50" width="50"></td>
                                     <td><?= $row['product_name'] ?></td>
                                     <td>Rs. <?= number_format($row['product_price'],2); ?></td>
+                                    <input type="hidden" class="pprice" value="<?= $row['product_price'] ?>">
                                     <td><input type="number" class="from-control itemQty" value="<?= $row['qty'] ?>"
                                             style="width: 55px;"></td>
                                     <td>Rs. <?= number_format($row['total_price'],2); ?></td>
@@ -99,6 +101,24 @@
     <script type="text/javascript">
     $(document).ready(function() {
 
+        $(".itemQty").on('change', function(){
+            var $el = $(this).closest('tr');
+
+            var pid = $el.find(".pid").val();
+            var pprice = $el.find(".pprice").val();
+            var qty = $el.find(".itemQty").val();
+            location.reload(true);
+
+            $.ajax({
+                url: 'action.php',
+                method: 'post',
+                cache: false,
+                data: {qty:qty,pid:pid,pprice:pprice},
+                success: function(response){
+                    console.log(response);
+                }
+            })
+        });
 
         load_cart_item_number();
 
